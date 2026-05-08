@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  ftp:
+    image: fauria/vsftpd
+    container_name: vsftpd
+    ports:
+      - "21:21"
+      - "30000-30009:30000-30009"
+    environment:
+      - FTP_USER=user
+      - FTP_PASS=pass
+      - PASV_ADDRESS=127.0.0.1
+      - PASV_MIN_PORT=30000
+      - PASV_MAX_PORT=30009
+      - LOG_STDOUT=1
+    volumes:
+      - ./ftpdata:/home/vsftpd
