@@ -35,6 +35,7 @@ struct dns_header {
 };
 
 /* Function prototypes */
+int validate_ip(const char *ip);
 int create_udp_socket();
 int build_dns_query(unsigned char *query, size_t query_size, const char *domain, uint16_t query_id);
 void encode_domain_name(unsigned char *buffer, const char *domain);int send_dns_query(int sockfd, const char *dns_server_ip, const unsigned char *query, int query_len);
@@ -58,6 +59,11 @@ int main(int argc, char *argv[]) {
     unsigned char query[QUERY_BUFFER];
     unsigned char response[RESPONSE_BUFFER];
     int query_len, response_len, found;
+
+    if (validate_ip(dns_server_ip) == 0) {
+        fprintf(stderr, "[ERROR] Invalid DNS Server IP Address");
+        exit(EXIT_FAILURE);
+    }
 
     /* Create UDP socket. */
     sockfd = create_udp_socket(dns_server_ip);
@@ -86,6 +92,16 @@ int main(int argc, char *argv[]) {
 
     close(sockfd);
     return EXIT_SUCCESS;
+}
+
+int validate_ip(const char *ip) {
+    struct in_addr addr;
+
+    if (inet_pton(AF_INET, ip, &addr) <= 0) {
+        return 0;
+    }
+
+    return 1;
 }
 
 int create_udp_socket() {
