@@ -1,0 +1,16 @@
+$ORIGIN lab.local.
+$TTL 60
+
+@ IN SOA ns.lab.local. admin.lab.local. (
+    2026061601
+    3600
+    600
+    86400
+    60
+)
+
+@    IN NS ns.lab.local.
+ns   IN A 127.0.0.1
+web  IN A 127.0.0.1
+ftp  IN A 127.0.0.1
+mail IN A 127.0.0.1

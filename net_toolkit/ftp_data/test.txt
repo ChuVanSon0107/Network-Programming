@@ -1,0 +1,2 @@
+This is a test file for the FTP module .
+If you can download this file, the FTP RETR command works.

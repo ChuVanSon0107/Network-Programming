@@ -1,0 +1,45 @@
+services:
+  dns:
+    image: coredns/coredns:latest
+    container_name: lab-dns
+    command: -conf /etc/coredns/Corefile
+    ports:
+      - "1053:53/udp"
+      - "1053:53/tcp"
+    volumes:
+      - ./coredns/Corefile:/etc/coredns/Corefile:ro
+      - ./coredns/lab.local.db:/zones/lab.local.db:ro
+
+  web:
+    image: nginx:alpine
+    container_name: lab-web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./web:/usr/share/nginx/html:ro
+
+  ftp:
+    image: fauria/vsftpd
+    container_name: lab-ftp
+    ports:
+      - "2121:21"
+      - "21000-21010:21000-21010"
+    environment:
+      FTP_USER: student
+      FTP_PASS: student123
+      PASV_ADDRESS: 127.0.0.1
+      PASV_MIN_PORT: 21000
+      PASV_MAX_PORT: 21010
+      LOG_STDOUT: "YES"
+    volumes:
+      - ./ftp_data:/home/vsftpd/student
+
+  mail:
+    image: axllent/mailpit:latest
+    container_name: lab-mail
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+      - "1110:1110"
+    environment:
+      MP_POP3_AUTH: "student:student123"
