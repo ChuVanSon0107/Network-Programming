@@ -1,4 +1,5 @@
 #include "ftp_module.h"
+#include "socket_utils.h"
 
 #include <arpa/inet.h>
 #include <stdio.h>
@@ -120,8 +121,8 @@ static int open_data_connection(const char *ip, int port) {
         return -1;
     }
 
-    if (connect(data_sock, (struct sockaddr *)&data_addr,
-                sizeof(data_addr)) < 0) {
+    if (connect_with_timeout(data_sock, (struct sockaddr *)&data_addr,
+                             sizeof(data_addr), TIMEOUT_SECONDS) < 0) {
         perror("connect data socket");
         close(data_sock);
         return -1;
@@ -159,8 +160,9 @@ int ftp_connect_to_server(const char *server_ip, int server_port) {
     }
 
     /* Connect to server through control connection. */
-    if (connect(control_sock, (struct sockaddr *)&server_addr,
-                sizeof(server_addr)) < 0) {
+    if (connect_with_timeout(control_sock,
+                             (struct sockaddr *)&server_addr,
+                             sizeof(server_addr), TIMEOUT_SECONDS) < 0) {
         perror("connect");
         close(control_sock);
         return -1;

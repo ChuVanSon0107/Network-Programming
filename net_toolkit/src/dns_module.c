@@ -13,6 +13,7 @@
 #define QUERY_BUFFER 512
 #define RESPONSE_BUFFER 512
 #define QUERY_ID 0x1234
+#define DNS_TIMEOUT_SECONDS 5
 
 /* DNS record types */
 #define TYPE_A 1
@@ -50,10 +51,23 @@ int validate_ip(const char *ip) {
 
 int create_udp_socket() {
     int sockfd;
+    struct timeval timeout;
+
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) {
         perror("socket");
-        exit(EXIT_FAILURE);
+        return -1;
+    }
+
+    timeout.tv_sec = DNS_TIMEOUT_SECONDS;
+    timeout.tv_usec = 0;
+    if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO,
+                   &timeout, sizeof(timeout)) < 0 ||
+        setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO,
+                   &timeout, sizeof(timeout)) < 0) {
+        perror("setsockopt");
+        close(sockfd);
+        return -1;
     }
 
     return sockfd;
@@ -151,7 +165,11 @@ int receive_dns_response(int sockfd, unsigned char *response, size_t response_si
     /* Receive DNS answer */
     received = recvfrom(sockfd, response, response_size, 0, (struct sockaddr *)&server_addr, &addr_len);
     if (received < 0) {
-        perror("recvfrom");
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            fprintf(stderr, "[ERROR] DNS response timeout\n");
+        } else {
+            perror("recvfrom");
+        }
         return -1;
     }
 

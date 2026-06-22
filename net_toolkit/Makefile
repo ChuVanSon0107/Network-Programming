@@ -6,7 +6,8 @@ SRC=src/main.c \
     src/http_module.c \
     src/ftp_module.c \
     src/smtp_module.c \
-    src/pop3_module.c
+    src/pop3_module.c \
+    src/socket_utils.c
 
 OBJ=$(SRC:.c=.o)
 TARGET=net_toolkit

@@ -1,4 +1,5 @@
 #include "pop3_module.h"
+#include "socket_utils.h"
 
 #include <arpa/inet.h>
 #include <errno.h>
@@ -49,8 +50,8 @@ static int connect_to_server(const char *server_ip, int server_port) {
         return -1;
     }
 
-    if (connect(sockfd, (struct sockaddr *)&server_addr,
-                sizeof(server_addr)) < 0) {
+    if (connect_with_timeout(sockfd, (struct sockaddr *)&server_addr,
+                             sizeof(server_addr), TIMEOUT_SECONDS) < 0) {
         perror("connect");
         close(sockfd);
         return -1;
